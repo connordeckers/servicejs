@@ -1,0 +1,22 @@
+{
+  "name": "servicejs",
+  "version": "1.0.0",
+  "description": "Create the necessary files to run a node package as a Linux background service.",
+  "main": "./src/index.ts",
+  "bin": {
+    "servicejs": "./bin/index.js"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "service",
+    "linux",
+    "background"
+  ],
+  "author": "Connor Deckers <@connordeckers>",
+  "license": "GPL-3.0-or-later",
+  "dependencies": {
+    "typescript": "^3.7.2"
+  }
+}
