@@ -1,13 +1,19 @@
 {
-  "name": "servicejs",
+  "name": "@connordeckers/servicejs",
   "version": "1.0.0",
   "description": "Create the necessary files to run a node package as a Linux background service.",
   "main": "./src/index.ts",
   "bin": {
     "servicejs": "./bin/index.js"
   },
+  "os": [
+    "linux"
+  ],
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "tsc",
+    "build:watch": "tsc --watch",
+    "start": "node ./bin/index.js"
   },
   "keywords": [
     "service",
@@ -17,6 +23,12 @@
   "author": "Connor Deckers <@connordeckers>",
   "license": "GPL-3.0-or-later",
   "dependencies": {
-    "typescript": "^3.7.2"
+    "@types/command-line-args": "^5.0.0",
+    "@types/inquirer": "^6.5.0",
+    "@types/which": "^1.3.2",
+    "command-line-args": "^5.1.1",
+    "inquirer": "^7.0.0",
+    "typescript": "^3.7.2",
+    "which": "^2.0.2"
   }
 }
