@@ -1,4 +1,16 @@
-const packageEnv = Object.entries(process.env).filter(([key]) => key.startsWith('npm_package')).reduce((o: any, c) => { o[c[0].replace('npm_package_', '')] = c[1]; return o; }, {});
+import fs from 'fs';
+import path from 'path';
+import chalk from 'chalk';
+
+const src = path.normalize(process.cwd() + '/package.json');
+
+if (!fs.existsSync(src)) {
+  console.error(chalk.red('package.json not found.'));
+  process.exit(0);
+}
+
+const packageEnv = require(src);
+
 if (packageEnv.name.startsWith('@') && packageEnv.name.includes('/')) {
   let [scope, name] = packageEnv.name.split('/');
   packageEnv.scope = scope;
