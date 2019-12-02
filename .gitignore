@@ -105,6 +105,7 @@ dist
 
 .vscode
 .tsbuild
-bin/
+bin/**/*
+!bin/index.js
 *.service
 .servicerc
