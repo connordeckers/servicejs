@@ -1,6 +1,6 @@
 {
   "name": "@connordeckers/servicejs",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Create the necessary files to run a node package as a Linux background service.",
   "main": "./src/index.ts",
   "bin": {
