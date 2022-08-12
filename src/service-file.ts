@@ -1,12 +1,12 @@
 // import sudo from 'sudo-prompt';
-import { promisify } from 'util';
-import proc from 'child_process';
+import { promisify } from "util";
+import proc from "child_process";
 const exec = promisify(proc.exec);
 
-import { promises as fs } from 'fs';
-import path from 'path';
-import { exists } from './utils';
-import chalk from 'chalk';
+import { promises as fs } from "fs";
+import path from "path";
+import { exists } from "./utils";
+import chalk from "chalk";
 
 interface ServiceFile {
   description: string;
@@ -15,47 +15,60 @@ interface ServiceFile {
     stop?: string;
     restart?: string;
     reload?: string;
-  },
+  };
   workingDirectory: string;
   restart: boolean;
-  waitForNetwork?: boolean
+  waitForNetwork?: boolean;
 }
 
 const run = async (cmd: string, verbose = false) => {
   try {
     const { stdout, stderr } = await exec(cmd);
-    if (stdout && verbose) console.log('>>', stdout);
-    if (stderr && verbose) console.error('!>>', stderr);
+    if (stdout && verbose) console.log(">>", stdout);
+    if (stderr && verbose) console.error("!>>", stderr);
     return { stdout, stderr };
-  } catch (e) {
+  } catch (e: any) {
     console.error(e.message);
   }
-}
+};
 
-const storePath = path.resolve(process.cwd(), './.servicerc');;
-export const store = async (): Promise<{ [key: string]: any }> => await exists(storePath) ? JSON.parse(await fs.readFile(storePath).then(res => res.toString())) : {};
+const storePath = path.resolve(process.cwd(), "./.servicerc");
+export const store = async (): Promise<{ [key: string]: any }> => {
+  const exist = await exists(storePath);
+  return exist
+    ? JSON.parse(await fs.readFile(storePath).then((res) => res.toString()))
+    : {};
+};
 
 const save = async (key: string, value: string | number | boolean | null) => {
   const data = await store();
   data[key] = value;
   await fs.writeFile(storePath, JSON.stringify(data));
-}
+};
 
 export class Service {
-  private name: string;
-
-  constructor(name: string) {
-    this.name = name.split('.service')[0];
+  constructor(private name: string) {
+    this.name = name.split(".service")[0];
   }
 
-  public async write({ description, exec, workingDirectory, waitForNetwork, restart }: ServiceFile) {
+  public async write({
+    description,
+    exec,
+    workingDirectory,
+    waitForNetwork,
+    restart,
+  }: ServiceFile) {
     const file = `
 [Unit]
 Description=${description}
-${!waitForNetwork ? '' : `Wants=network-online.target\nAfter=network-online.target`}
+${
+  !waitForNetwork
+    ? ""
+    : `Wants=network-online.target\nAfter=network-online.target`
+}
 
 [Service]
-${restart ? `Restart=always` : ''}
+${restart ? `Restart=always` : ""}
 ExecStart=${exec.start}
 WorkingDirectory=${workingDirectory}
 
@@ -65,20 +78,23 @@ WantedBy=multi-user.target
 
     try {
       const local = `${process.cwd()}/${this.name}.service`;
-      const remote = path.resolve('/etc/systemd/system', `${this.name}.service`);
+      const remote = path.resolve(
+        "/etc/systemd/system",
+        `${this.name}.service`
+      );
 
-      await save('name', `${this.name}.service`);
+      await save("name", `${this.name}.service`);
       await fs.writeFile(`${this.name}.service`, file);
-      if (!await exists(remote)) {
+      if (!(await exists(remote))) {
         await run(`ln -s ${local} ${remote}`);
       }
-    } catch (e) {
+    } catch (e: any) {
       console.error(chalk.red(e.message));
     }
   }
 
   public reloadDaemon(verbose = false) {
-    return run('systemctl daemon-reload', verbose);
+    return run("systemctl daemon-reload", verbose);
   }
 
   public enable(verbose = false) {
@@ -110,16 +126,19 @@ WantedBy=multi-user.target
   }
 
   public async status(verbose = false) {
-    const data = await run(`systemctl status ${this.name}.service | grep Active:`, verbose);
+    const data = await run(
+      `systemctl status ${this.name}.service | grep Active:`,
+      verbose
+    );
 
-    if (data?.stdout.toLowerCase().includes('inactive (dead)')) {
-      console.log(chalk.blue('Status: '), chalk.white('offline'));
+    if (data?.stdout.toLowerCase().includes("inactive (dead)")) {
+      console.log(chalk.blue("Status: "), chalk.white("offline"));
       return false;
-    } else if (data?.stdout.toLowerCase().includes('failed')) {
-      console.log(chalk.blue('Status: '), chalk.red('failed'));
+    } else if (data?.stdout.toLowerCase().includes("failed")) {
+      console.log(chalk.blue("Status: "), chalk.red("failed"));
       return false;
-    } else if (data?.stdout.toLowerCase().includes(': active')) {
-      console.log(chalk.blue('Status: '), chalk.green('active'));
+    } else if (data?.stdout.toLowerCase().includes(": active")) {
+      console.log(chalk.blue("Status: "), chalk.green("active"));
       return true;
     } else {
       data?.stdout ? console.log(chalk.blue(data?.stdout)) : null;
